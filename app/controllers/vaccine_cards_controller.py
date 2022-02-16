@@ -37,7 +37,7 @@ def create_vaccine_card():
     data = request.get_json()
 
     if len(data["cpf"]) != 11:
-        return {"error": "Wrong CPF format"}, HTTPStatus.BAD_REQUEST
+        return {"error": f"Expected CPf format is 11 characters, received {len(data['cpf'])}"}, HTTPStatus.BAD_REQUEST
 
     for value in data.values():
         if type(value) != type("string"):
@@ -47,10 +47,12 @@ def create_vaccine_card():
 
     for key in default_keys:
         if key not in data.keys():
-            return {"error": "Incomplete request, check all fields"}, HTTPStatus.BAD_REQUEST
+            return {"error": f"Incomplete request, check {key} field"}, HTTPStatus.BAD_REQUEST
+
+    new_data = {key:value for (key,value) in data.items() if key in default_keys}
 
     try:
-        vaccine_card = VaccineCard(**data)
+        vaccine_card = VaccineCard(**new_data)
 
         db.session.add(vaccine_card)
         db.session.commit()
